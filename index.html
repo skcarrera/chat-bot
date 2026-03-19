@@ -513,7 +513,7 @@ async function sendMessage() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-5',
         max_tokens: 1000,
         system: SYSTEM_PROMPT,
         messages: conversationHistory
@@ -523,7 +523,7 @@ async function sendMessage() {
     const data = await response.json();
     removeTyping();
 
-    const reply = data.content?.[0]?.text || "The Archive is momentarily unavailable. Please try again.";
+    const reply = data.content?.[0]?.text || "Debug: " + JSON.stringify(data);
     conversationHistory.push({ role: 'assistant', content: reply });
     appendMessage('assistant', reply);
 
