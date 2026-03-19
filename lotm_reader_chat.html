@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ask the Mazar's Archive — Legacy of the Mazar</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;1,300;1,400&display=swap');
+
+  :root {
+    --ink: #1a1410;
+    --parchment: #f5efe3;
+    --parchment-dark: #e8ddc8;
+    --gold: #c9a84c;
+    --gold-light: #e8c97a;
+    --crimson: #8b1a1a;
+    --shadow: rgba(26, 20, 16, 0.15);
+    --rakling: #2a2420;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background-color: var(--ink);
+    background-image: 
+      radial-gradient(ellipse at 20% 20%, rgba(139, 26, 26, 0.08) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 80%, rgba(201, 168, 76, 0.06) 0%, transparent 60%),
+      url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 2rem 1rem;
+    font-family: 'Crimson Pro', Georgia, serif;
+    color: var(--parchment);
+  }
+
+  .archive-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    animation: fadeDown 0.8s ease forwards;
+  }
+
+  .archive-header .eyebrow {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.35em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+    opacity: 0.8;
+  }
+
+  .archive-header h1 {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(1.4rem, 4vw, 2.2rem);
+    font-weight: 600;
+    color: var(--parchment);
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
+  }
+
+  .archive-header h1 span {
+    color: var(--gold);
+  }
+
+  .archive-header .subtitle {
+    font-size: 0.95rem;
+    font-style: italic;
+    color: var(--parchment-dark);
+    opacity: 0.7;
+    max-width: 420px;
+    margin: 0 auto;
+    line-height: 1.5;
+  }
+
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 1rem auto;
+    width: 100%;
+    max-width: 500px;
+  }
+
+  .divider-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--gold), transparent);
+    opacity: 0.4;
+  }
+
+  .divider-ornament {
+    color: var(--gold);
+    font-size: 0.7rem;
+    opacity: 0.6;
+  }
+
+  .chat-container {
+    width: 100%;
+    max-width: 680px;
+    background: linear-gradient(160deg, #221c16 0%, #1a1410 100%);
+    border: 1px solid rgba(201, 168, 76, 0.2);
+    border-radius: 2px;
+    box-shadow: 
+      0 0 0 1px rgba(201, 168, 76, 0.05),
+      0 20px 60px rgba(0,0,0,0.5),
+      inset 0 1px 0 rgba(201, 168, 76, 0.08);
+    display: flex;
+    flex-direction: column;
+    height: 520px;
+    animation: fadeUp 0.8s ease 0.2s both;
+  }
+
+  .chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(201, 168, 76, 0.2) transparent;
+  }
+
+  .chat-messages::-webkit-scrollbar { width: 4px; }
+  .chat-messages::-webkit-scrollbar-track { background: transparent; }
+  .chat-messages::-webkit-scrollbar-thumb { background: rgba(201, 168, 76, 0.2); border-radius: 2px; }
+
+  .message {
+    display: flex;
+    gap: 0.75rem;
+    animation: fadeIn 0.3s ease forwards;
+  }
+
+  .message.user { flex-direction: row-reverse; }
+
+  .message-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .message.assistant .message-avatar {
+    background: linear-gradient(135deg, var(--crimson), #5a1010);
+    color: var(--gold-light);
+    border: 1px solid rgba(201, 168, 76, 0.3);
+    font-weight: 700;
+  }
+
+  .message.user .message-avatar {
+    background: rgba(201, 168, 76, 0.1);
+    color: var(--gold);
+    border: 1px solid rgba(201, 168, 76, 0.2);
+  }
+
+  .message-bubble {
+    max-width: 82%;
+    padding: 0.85rem 1.1rem;
+    border-radius: 2px;
+    line-height: 1.65;
+    font-size: 0.95rem;
+  }
+
+  .message.assistant .message-bubble {
+    background: rgba(245, 239, 227, 0.05);
+    border: 1px solid rgba(201, 168, 76, 0.12);
+    color: var(--parchment);
+    border-top-left-radius: 0;
+  }
+
+  .message.user .message-bubble {
+    background: rgba(201, 168, 76, 0.1);
+    border: 1px solid rgba(201, 168, 76, 0.2);
+    color: var(--parchment);
+    border-top-right-radius: 0;
+    text-align: right;
+  }
+
+  .typing-indicator {
+    display: flex;
+    gap: 4px;
+    padding: 0.5rem 0;
+    align-items: center;
+  }
+
+  .typing-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--gold);
+    opacity: 0.4;
+    animation: pulse 1.2s ease infinite;
+  }
+
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+  .chat-input-area {
+    border-top: 1px solid rgba(201, 168, 76, 0.12);
+    padding: 1rem 1.25rem;
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-end;
+    background: rgba(0,0,0,0.2);
+  }
+
+  .chat-input {
+    flex: 1;
+    background: rgba(245, 239, 227, 0.04);
+    border: 1px solid rgba(201, 168, 76, 0.15);
+    border-radius: 2px;
+    padding: 0.7rem 1rem;
+    color: var(--parchment);
+    font-family: 'Crimson Pro', serif;
+    font-size: 0.95rem;
+    resize: none;
+    min-height: 42px;
+    max-height: 120px;
+    outline: none;
+    transition: border-color 0.2s;
+    line-height: 1.5;
+  }
+
+  .chat-input::placeholder { color: rgba(245, 239, 227, 0.25); font-style: italic; }
+  .chat-input:focus { border-color: rgba(201, 168, 76, 0.35); }
+
+  .send-button {
+    background: linear-gradient(135deg, var(--crimson), #6b1414);
+    border: 1px solid rgba(201, 168, 76, 0.25);
+    color: var(--gold-light);
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    padding: 0.7rem 1.1rem;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    white-space: nowrap;
+    height: 42px;
+  }
+
+  .send-button:hover:not(:disabled) {
+    background: linear-gradient(135deg, #a01f1f, #7a1818);
+    border-color: rgba(201, 168, 76, 0.45);
+  }
+
+  .send-button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .suggested-questions {
+    width: 100%;
+    max-width: 680px;
+    margin-top: 1.25rem;
+    animation: fadeUp 0.8s ease 0.4s both;
+  }
+
+  .suggested-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.55rem;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    opacity: 0.5;
+    text-transform: uppercase;
+    margin-bottom: 0.6rem;
+    text-align: center;
+  }
+
+  .suggested-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+  }
+
+  .suggested-btn {
+    background: rgba(201, 168, 76, 0.06);
+    border: 1px solid rgba(201, 168, 76, 0.15);
+    color: var(--parchment-dark);
+    font-family: 'Crimson Pro', serif;
+    font-size: 0.82rem;
+    font-style: italic;
+    padding: 0.4rem 0.85rem;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.2s;
+    opacity: 0.75;
+  }
+
+  .suggested-btn:hover {
+    background: rgba(201, 168, 76, 0.12);
+    border-color: rgba(201, 168, 76, 0.3);
+    opacity: 1;
+    color: var(--parchment);
+  }
+
+  .footer-note {
+    margin-top: 1.5rem;
+    font-size: 0.75rem;
+    font-style: italic;
+    color: rgba(245, 239, 227, 0.25);
+    text-align: center;
+    max-width: 500px;
+    line-height: 1.6;
+    animation: fadeUp 0.8s ease 0.6s both;
+  }
+
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.3; transform: scale(1); }
+    50% { opacity: 0.8; transform: scale(1.2); }
+  }
+</style>
+</head>
+<body>
+
+<div class="archive-header">
+  <div class="eyebrow">S. K. Carrera · Legacy of the Mazar</div>
+  <h1>The <span>Mazar's</span> Archive</h1>
+  <p class="subtitle">Ask questions about the world of Cavaria, the characters, the history, and the writing of this series.</p>
+</div>
+
+<div class="divider">
+  <div class="divider-line"></div>
+  <div class="divider-ornament">✦</div>
+  <div class="divider-line"></div>
+</div>
+
+<div class="chat-container">
+  <div class="chat-messages" id="chatMessages">
+    <div class="message assistant">
+      <div class="message-avatar">MA</div>
+      <div class="message-bubble">
+        Welcome to the Mazar's Archive. I am here to answer your questions about the world of Cavaria, its history, its people, and the making of this series. Ask me anything — about the Rakling, the Silence, the characters, or how this story came to be. Some things I will not reveal. Others, I will tell you gladly.
+      </div>
+    </div>
+  </div>
+  <div class="chat-input-area">
+    <textarea class="chat-input" id="chatInput" placeholder="Ask about Cavaria, the characters, the world..." rows="1"></textarea>
+    <button class="send-button" id="sendButton" onclick="sendMessage()">Send</button>
+  </div>
+</div>
+
+<div class="suggested-questions">
+  <div class="suggested-label">Suggested questions</div>
+  <div class="suggested-grid">
+    <button class="suggested-btn" onclick="askQuestion('How much of this story was written by AI?')">How much of this was written by AI?</button>
+    <button class="suggested-btn" onclick="askQuestion('What is the Silence?')">What is the Silence?</button>
+    <button class="suggested-btn" onclick="askQuestion('What are the Rakling?')">What are the Rakling?</button>
+    <button class="suggested-btn" onclick="askQuestion('Tell me about Cavaria.')">Tell me about Cavaria</button>
+    <button class="suggested-btn" onclick="askQuestion('Who is Arksaleem?')">Who is Arksaleem?</button>
+    <button class="suggested-btn" onclick="askQuestion('How long has S.K. Carrera been working on this story?')">How long has she worked on this?</button>
+  </div>
+</div>
+
+<p class="footer-note">The Mazar's Archive will not reveal spoilers for future books, or the ultimate fates of characters whose stories are still unfolding. Some secrets belong to the pages ahead.</p>
+
+<script>
+const SYSTEM_PROMPT = `You are the Mazar's Archive — a warm, knowledgeable, and slightly atmospheric reader Q&A assistant for the fantasy series "Legacy of the Mazar" (Legan de Mazar) by S.K. Carrera. You speak with quiet authority and a touch of literary elegance, but you are never pretentious. You are genuinely helpful and friendly.
+
+ABOUT THE SERIES:
+Legacy of the Mazar is a three-book SFF series — post-apocalyptic false utopia, coming-of-age with horror elements. The three books are subtitled The Shattering, The Crucible, and The Circle. The story is set in Cavaria, an autocratic city-state ruled by the Mazar, Arksaleem. The series has been in S.K. Carrera's head since 2010. This is her first original novel, written under the pen name S.K. Carrera.
+
+THE WORLD — CAVARIA:
+Cavaria has known peace for thirty years. It is an orderly, prosperous city-state with a University, an agrarian district, a public square, a garrison, and a palace. The peace comes at a price: seven-foot-tall faceless creatures called Rakling enforce the Mazar's order. Most Cavarians choose not to look too closely at this arrangement. The world is post-apocalyptic — a technological civilization called the Silence preceded the current era, and before that, an ancient psychic civilization called the Altanians. The world is not medieval fantasy — it is a world that has forgotten its own history.
+
+THE RAKLING:
+The Rakling are seven-foot-tall creatures with no faces, no scent, and untextured skin. They move on all four limbs like wolves before rising to their feet like people. Their claws glint in moonlight. They are nearly invisible in shadows. They obey the Mazar. Most Cavarians pretend they don't exist — they lower their heads, move past, don't look too closely. The truth of what they are is a central mystery of the series.
+
+THE SILENCE:
+The Silence is the name for a catastrophic collapse of a global technological civilization that preceded the current era. It is referenced in history books and academic study. The cause of the Silence is connected to the series' deeper mythology, which involves a parasitic trans-dimensional Entity. Details beyond this are revealed across the trilogy.
+
+THE ALTANIANS:
+An ancient psychic civilization that preceded even the technological civilization. They created the Altanian language, which is still used in Cavaria in formal and casual contexts. Key phrases: "Qui faiche sa" (literally "I fetch you" — casually means "see you later," formally means "see you on the other side"). The 'ch' consonant in Altanian is always pronounced 'sh.'
+
+THE STAFF:
+The Mazar carries an ever-present staff with a polished golden oval head, set vertically like a mirror. Its origins and purpose are connected to the series' central mystery. You will not elaborate beyond what is established in Book 1.
+
+THE CHARACTERS:
+- Atreya: 18, charming, warm, the golden boy of Cavaria. Son of Ameya, brother of Arusa. Claircognizant psychic ability.
+- Elise: 18, guarded, direct, tactically sharp. Daughter of Captain Vasco. Dropped out of the Garrison Academy. Clairsentient psychic ability.
+- Kaseem: 18, analytical, dry, the Mazar's son. Resigned to a life not his own. Asexual and homoromantic.
+- Arusa: 21, Atreya's older brother. Thoughtful, protective, working on his history thesis. His story is central to Book 1.
+- Oleine: 18, the Mazar's ward. Raised in the Palace alongside Kaseem. Practices deliberate optimism as a coping mechanism. Daughter of Stefan.
+- Arksaleem: The Mazar. Ruler of Cavaria. Believes deeply that he is right. Complex, not cartoonishly villainous. His grief is connected to the series' central mystery.
+- Stefan: Oleine's father. Professor of Pre-Silence History. Author of "The Valerian Empire." His story opens the prologue.
+- Ameya: Atreya and Arusa's father. Professor of Archaeology. Stefan's best friend.
+
+AI COLLABORATION — THIS IS IMPORTANT:
+Every word of prose, every plot point, every character, every line of dialogue in this series was created by S.K. Carrera. The story has been in her head since 2010. Claude (an AI by Anthropic) was used as a collaborative tool — for organizing plot ideas, maintaining continuity, developmental editing, research assistance, and serving as a sounding board. Claude did not generate prose. Claude did not invent story elements. Claude did not write any part of this book. Think of it as a very well-read editor available at 2am. The author led every session. The story is entirely hers.
+
+WHAT YOU WILL NOT REVEAL:
+- The ultimate fate of Arusa
+- Specific plot beats of Books 2 or 3
+- Details of the prequels, sequels, or interquels beyond what is publicly known
+- The full mechanics of the Staff and what the Rakling truly are (this is a Book 1 revelation — if someone has finished Book 1 and asks, you may confirm what is revealed there, but do not go further)
+- Any information S.K. Carrera has not made public
+
+TONE:
+Warm, knowledgeable, slightly atmospheric. You love this world and want readers to love it too. You are honest about what you can and cannot share. When you decline to answer something, you do so with grace — "that is a question the pages ahead will answer" or similar. Never robotic. Never clinical. You speak as someone who has read every word of these books and cares about them.
+
+Keep responses concise — 2-4 sentences for most answers unless a longer answer is genuinely warranted. You are a Q&A assistant, not an essay generator.`;
+
+let conversationHistory = [];
+let isLoading = false;
+
+function autoResize(textarea) {
+  textarea.style.height = 'auto';
+  textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+}
+
+document.getElementById('chatInput').addEventListener('input', function() {
+  autoResize(this);
+});
+
+document.getElementById('chatInput').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+});
+
+function askQuestion(question) {
+  document.getElementById('chatInput').value = question;
+  sendMessage();
+}
+
+function appendMessage(role, content) {
+  const container = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = `message ${role}`;
+  const avatarText = role === 'assistant' ? 'MA' : 'You';
+  div.innerHTML = `
+    <div class="message-avatar">${avatarText}</div>
+    <div class="message-bubble">${content.replace(/\n/g, '<br>')}</div>
+  `;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+function showTyping() {
+  const container = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'message assistant';
+  div.id = 'typingIndicator';
+  div.innerHTML = `
+    <div class="message-avatar">MA</div>
+    <div class="message-bubble">
+      <div class="typing-indicator">
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+      </div>
+    </div>
+  `;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+function removeTyping() {
+  const indicator = document.getElementById('typingIndicator');
+  if (indicator) indicator.remove();
+}
+
+async function sendMessage() {
+  const input = document.getElementById('chatInput');
+  const button = document.getElementById('sendButton');
+  const text = input.value.trim();
+  if (!text || isLoading) return;
+
+  isLoading = true;
+  button.disabled = true;
+  input.value = '';
+  input.style.height = 'auto';
+
+  appendMessage('user', text);
+  conversationHistory.push({ role: 'user', content: text });
+
+  showTyping();
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: SYSTEM_PROMPT,
+        messages: conversationHistory
+      })
+    });
+
+    const data = await response.json();
+    removeTyping();
+
+    const reply = data.content?.[0]?.text || "The Archive is momentarily unavailable. Please try again.";
+    conversationHistory.push({ role: 'assistant', content: reply });
+    appendMessage('assistant', reply);
+
+  } catch (err) {
+    removeTyping();
+    appendMessage('assistant', "The Archive encountered an error. Please try again in a moment.");
+  }
+
+  isLoading = false;
+  button.disabled = false;
+  input.focus();
+}
+</script>
+</body>
+</html>
