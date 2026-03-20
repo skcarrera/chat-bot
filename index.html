@@ -523,7 +523,7 @@ async function sendMessage() {
     const data = await response.json();
     removeTyping();
 
-    const reply = data.content?.[0]?.text || "The Archive is momentarily unavailable. Please try again.";
+    const reply = data.content?.[0]?.text || "Error. I probably ran out of credits. Come back later.";
     conversationHistory.push({ role: 'assistant', content: reply });
     appendMessage('assistant', reply);
 
